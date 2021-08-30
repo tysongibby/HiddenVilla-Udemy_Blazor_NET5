@@ -1,44 +1,36 @@
 ﻿@page "/demohotel"
 @using Model
 
+
 <h3>
     We willd isplay hotel rooms and amenities here!
 </h3>
-<div class="bg-light border p-2 mt-2" style="background-color:azure">
+<div class="border p-2 mt-2" style="background-color:azure">
     <h2 class="text-info">
         Room List [USING COMPONENT]
     </h2>
     <div class="row container">
+        <h4 class="text-info">Hotel Rooms</h4>
         @foreach (var room in RoomsList)
         {
-        <div class="col bg-light border">
-            <h4 class="text-secondary">Room - @room.Id</h4>
-            <br />
-            @room.RoomName
-            <br />
-            @room.Price.ToString("c")
-            <br />
-            <input type="checkbox" @bind-value="room.IsActive" checked="@(room.IsActive ? "checked" : null)" /> &nbsp; Is Active
-            <span>This room is @(room.IsActive ? "Active" : "Inactive").</span>
-            @if (room.IsActive)
-            {
-                @foreach (var prop in room.RoomProps)
-                {
-                    <p>@prop.Name - @prop.Value</p>
-                }
-            }
-            <br />
-            <input type="button" class="btn btn-danger" value="Delete" />
-            <input type="button" class="btn btn-success" value="Edit" />
-        </div>
+            <IndividualRoom Room="@room"></IndividualRoom>
+        }
+
+    </div>
+    <div class="row container">
+        <h4 class="text-info">Hotel Amenities</h4>
+        @foreach (var amenity in AmenitiesList)
+        {
+            <IndividualAmenity Amenity="@amenity"></IndividualAmenity>
         }
     </div>
 </div>
 
 
 @code{
-    
+
     List<BlazorRoom> RoomsList = new List<BlazorRoom>();
+    List<BlazorAmenity> AmenitiesList = new List<BlazorAmenity>();
 
     protected override void OnInitialized()
     {
@@ -114,6 +106,28 @@
                 },
             }
 
+        });
+
+
+        AmenitiesList.Add(new BlazorAmenity()
+        {
+            Id = 111,
+            Name = "Gym",
+            Description = "24x7 gym room is available"
+        });
+
+        AmenitiesList.Add(new BlazorAmenity()
+        {
+            Id = 222,
+            Name = "Swimming Pool",
+            Description = "Pool is open from 6 AM to 10 PM"
+        });
+
+        AmenitiesList.Add(new BlazorAmenity()
+        {
+            Id = 333,
+            Name = "Free Breakfast",
+            Description = "Enjoy free breakfast at our hotel."
         });
     }
 
