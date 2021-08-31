@@ -10,12 +10,21 @@
     <ChildContent>Render Fragment From Parent! WooHOO! (with child content tag)</ChildContent>
     <DangerChildContent>Danger Content from Render Fragment! WooHOO! (with danger child content tag)</DangerChildContent>
 </ChildComponent>
+<br />
+<AnotherChildComponent InputAttributes="InputAttributesFromParent" ></AnotherChildComponent>
 
 <p><b>@messageText</b></p>
 
 
 @code 
 {
+    public Dictionary<string, object> InputAttributesFromParent { get; set; } = new Dictionary<string, object>()
+    {
+        { "required" , "required" },
+        { "placeholder" , "Enter the Room Name From Parent" },
+        { "maxlength" , 5 }
+    };
+
     private string messageText = "";
 
     private void ShowMessage(MouseEventArgs e)
@@ -24,7 +33,7 @@
         {
             messageText = "Blazing text from parent";
         }
-        else 
+        else
         {
             messageText = "";
         }
