@@ -11,26 +11,37 @@
     </h2>
     <div class="row container">
         <h4 class="text-info">Hotel Rooms</h4>
-        @foreach (var room in RoomsList)
-        {
-            <IndividualRoom Room="@room"></IndividualRoom>
-        }
-
+        <br />
+        <span>Rooms Selected - @SelectedRooms</span>
+        <div class="row container">
+            @foreach (var room in RoomsList)
+            {
+                <IndividualRoom OnRoomCheckboxSelection="RoomSelectionCounterChanged" Room="@room"></IndividualRoom>
+            }
+        </div>
     </div>
     <div class="row container">
         <h4 class="text-info">Hotel Amenities</h4>
         @foreach (var amenity in AmenitiesList)
         {
-            <IndividualAmenity Amenity="@amenity"></IndividualAmenity>
+            <IndividualAmenity OnAmenitySelection="@AmenitySelectionChanged" Amenity="@amenity" ></IndividualAmenity>
         }
+    </div>
+    <div class="row container">
+        <div class="col-12">
+            <p class="text-secondary">Selected Amenity: @SelectedAmenity</p>
+        </div>
     </div>
 </div>
 
 
 @code{
 
+    public int SelectedRooms { get; set; } = 0;
+    public string SelectedAmenity { get; set; } = "";
     List<BlazorRoom> RoomsList = new List<BlazorRoom>();
     List<BlazorAmenity> AmenitiesList = new List<BlazorAmenity>();
+
 
     protected override void OnInitialized()
     {
@@ -129,6 +140,23 @@
             Name = "Free Breakfast",
             Description = "Enjoy free breakfast at our hotel."
         });
+    }
+
+    protected void RoomSelectionCounterChanged(bool isRoomSelected)
+    {
+        if (isRoomSelected)
+        {
+            SelectedRooms++;
+        }
+        else
+        {
+            SelectedRooms--;
+        }
+    }
+
+    protected void AmenitySelectionChanged(string amenity)
+    {
+        SelectedAmenity = amenity;
     }
 
 }
