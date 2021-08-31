@@ -10,7 +10,7 @@
         Room List [USING COMPONENT]
     </h2>
     <div class="row container">
-        <h4 class="text-info">Hotel Rooms</h4>
+        <h4 class="text-info col-12">Hotel Rooms</h4>
         <br />
         <span>Rooms Selected - @SelectedRooms</span>
         <div class="row container">
@@ -21,10 +21,14 @@
         </div>
     </div>
     <div class="row container">
-        <h4 class="text-info">Hotel Amenities</h4>
+        <h4 class="text-info col-12">Hotel Amenities</h4>
         @foreach (var amenity in AmenitiesList)
         {
-            <IndividualAmenity OnAmenitySelection="@AmenitySelectionChanged" Amenity="@amenity" ></IndividualAmenity>
+            <IndividualAmenity OnAmenitySelection="@AmenitySelectionChanged" Amenity="@amenity" >
+                <FirstFragment>#1</FirstFragment>
+                <SecondFragment>#2</SecondFragment>
+            </IndividualAmenity>
+            
         }
     </div>
     <div class="row container">

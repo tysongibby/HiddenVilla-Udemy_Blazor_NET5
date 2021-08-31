@@ -5,6 +5,7 @@
     <br />
     @Amenity.Description
     <br />
+    RF from Parent - @FirstFragment @SecondFragment    
 </div>
 @code {
     [Parameter]
@@ -18,4 +19,8 @@
         await OnAmenitySelection.InvokeAsync(name);
     }
 
+    [Parameter]
+    public RenderFragment FirstFragment { get; set; }
+    [Parameter]
+    public RenderFragment SecondFragment { get; set; }
 }
