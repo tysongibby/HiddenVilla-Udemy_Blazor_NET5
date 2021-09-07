@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210901162940_AddHotelRoom")]
-    partial class AddHotelRoom
+    [Migration("20210906214337_CreateDB")]
+    partial class CreateDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,6 +59,37 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HotelRooms");
+                });
+
+            modelBuilder.Entity("DataAccess.Data.HotelRoomImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoomImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("HotelRoomImages");
+                });
+
+            modelBuilder.Entity("DataAccess.Data.HotelRoomImage", b =>
+                {
+                    b.HasOne("DataAccess.Data.HotelRoom", "HotelRoom")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HotelRoom");
                 });
 #pragma warning restore 612, 618
         }

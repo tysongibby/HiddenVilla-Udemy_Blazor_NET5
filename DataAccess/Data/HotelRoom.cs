@@ -24,5 +24,8 @@ namespace DataAccess.Data
         public string UpdatedBy { get; set; }
         public DateTime UpdatedDate { get; set; }
 
+        // in this case virtual does not need a data migration
+        public virtual ICollection<HotelRoomImage> HotelRoomImages { get; set; }
+
     }
 }

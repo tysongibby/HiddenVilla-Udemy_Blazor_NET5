@@ -15,6 +15,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Business.Repository.IRepository;
 using Business.Repository;
+using HiddenVilla.Server.Services;
+using HiddenVilla.Server.Services.IServices;
+
 
 namespace HiddenVilla.Server
 {
@@ -37,7 +40,10 @@ namespace HiddenVilla.Server
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddScoped<IHotelRoomRepository, HotelRoomRepository>();
+            services.AddScoped<IFileUpload, FileUpload>();
+            services.AddScoped<IHotelRoomImageRepository, HotelRoomImageRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
