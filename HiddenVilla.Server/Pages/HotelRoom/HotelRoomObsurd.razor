@@ -3,10 +3,16 @@
 @using Models
 @using Business.Repository.IRepository
 @using HiddenVilla.Server.Services.IServices
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using HiddenVilla.Server.Helper
+@using Microsoft.AspNetCore.Components.Forms
 @inject IHotelRoomRepository HotelRoomRepository
+@inject IHotelRoomImageRepository HotelRoomImageRepository
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @inject IFileUpload FileUpload
+
 
 <div class="row mt-2 mb-5">
     <h3 class="card-title text-info mb-3">Create Hotel Room</h3>
@@ -14,7 +20,7 @@
         <div class="card">
             <div class="card-body">
                 <EditForm Model="hotelRoomDto" OnValidSubmit="HandleHotelRoomObsurd">
-                    <DataAnnotationsValidator/>
+                    <DataAnnotationsValidator />
                     @*<ValidationSummary/>*@
                     <div class="form-group">
                         <label>Name</label>
@@ -41,6 +47,24 @@
                     </div>
                     <div class="form-group">
                         <InputFile OnChange="HandleImageUpload" multiple></InputFile>
+                        <div class="row">
+                            @if (hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Count > 0)
+                            {
+                                int count = 1;
+                                foreach (var imageUrl in hotelRoomDto.ImageUrls)
+                                {
+                                    <div class="col-md-2 mt-3">
+                                        <div class="room-image" style="background: url('@imageUrl') 50% 50%;">
+                                            <span class="room-image-title">@count</span>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-block mt-4">
+                                            Delete
+                                        </button>
+                                    </div>
+                                    count++;
+                                }
+                            }
+                        </div>
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary">@Title Room </button>
@@ -52,20 +76,27 @@
     </div>
 </div>
 
-@code {
+@code
+{
 
     [Parameter]
     public int? Id { get; set; }
     private HotelRoomDto hotelRoomDto { get; set; } = new HotelRoomDto();
     private string Title { get; set; } = "Create";
+    private HotelRoomImageDto RoomImageDto { get; set; } = new HotelRoomImageDto();
+    private bool IsImageUploadProcessStarted { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if(Id != null)
+        if (Id != null)
         {
             //update
             Title = "Update";
             hotelRoomDto = await HotelRoomRepository.GetHotelRoom(Id.Value);
+            if(hotelRoomDto?.HotelRoomImages.Count != null)
+            {
+                hotelRoomDto.ImageUrls = hotelRoomDto.HotelRoomImages.Select(u => u.RoomImageUrl).ToList();
+            }
         }
         else
         {
@@ -85,16 +116,18 @@
 
         try
         {
-            if(hotelRoomDto.Id !=0 && Title == "Update")
+            if (hotelRoomDto.Id != 0 && Title == "Update")
             {
                 //Update
                 var updateRoomResult = await HotelRoomRepository.UpdateHotelRoom(hotelRoomDto.Id, hotelRoomDto);
+                await AddHotelRoomImage(updateRoomResult);
                 await JsRuntime.ToastrSuccess("Hotel room updated successfully.");
             }
             else
             {
                 //create
                 var createdResult = await HotelRoomRepository.CreateHotelRoom(hotelRoomDto);
+                await AddHotelRoomImage(createdResult);
                 await JsRuntime.ToastrSuccess("Hotel room created successfully.");
             }
 
@@ -111,15 +144,16 @@
 
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
+        IsImageUploadProcessStarted = true;
         try
         {
             var images = new List<string>();
-            if(e.GetMultipleFiles().Count > 0)
+            if (e.GetMultipleFiles().Count > 0)
             {
-                foreach(var file in e.GetMultipleFiles())
+                foreach (var file in e.GetMultipleFiles())
                 {
                     System.IO.FileInfo fileInfo = new System.IO.FileInfo(file.Name);
-                    if (fileInfo.Extension.ToLower() == ".jpg" || fileInfo.Extension.ToLower() == ".jpeg" || fileInfo.Extension.ToLower() == ".png" )
+                    if (fileInfo.Extension.ToLower() == ".jpg" || fileInfo.Extension.ToLower() == ".jpeg" || fileInfo.Extension.ToLower() == ".png")
                     {
                         var uploadedImagePath = await FileUpload.UploadFile(file);
                         images.Add(uploadedImagePath);
@@ -133,7 +167,7 @@
 
                 if (images.Any())
                 {
-                    if(hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Any())
+                    if (hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Any())
                     {
                         hotelRoomDto.ImageUrls.AddRange(images);
                     }
@@ -149,10 +183,37 @@
                     return;
                 }
             }
+            IsImageUploadProcessStarted = false;
         }
         catch (Exception ex)
         {
             await JsRuntime.ToastrError(ex.Message);
         }
     }
+
+    private async Task AddHotelRoomImage(HotelRoomDto roomDto)
+    {
+        try
+        {
+            foreach (var imageUrl in hotelRoomDto.ImageUrls)
+            {
+                if (hotelRoomDto.HotelRoomImages == null || hotelRoomDto.HotelRoomImages.Where(x => x.RoomImageUrl == imageUrl).Count() == 0)
+                {
+
+                    RoomImageDto = new HotelRoomImageDto()
+                    {
+                        RoomId = roomDto.Id,
+                        RoomImageUrl = imageUrl
+                    };
+                    await HotelRoomImageRepository.CreateHotelRoomImage(RoomImageDto);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
 }
+

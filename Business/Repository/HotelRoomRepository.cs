@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business.Repository
@@ -27,6 +25,7 @@ namespace Business.Repository
             hotelRoom.CreatedDate = DateTime.Now;
             hotelRoom.CreatedBy = "";
             var addedHotelRoom = await _db.HotelRooms.AddAsync(hotelRoom);
+            //await _db.HotelRoomImages.AddRangeAsync(hotelRoom.HotelRoomImages);
             await _db.SaveChangesAsync();
             return _mapper.Map<HotelRoom, HotelRoomDto>(addedHotelRoom.Entity);
         }
@@ -46,7 +45,7 @@ namespace Business.Repository
         {
            try
             {
-                IEnumerable<HotelRoomDto> hotelRoomDtos = _mapper.Map<IEnumerable<HotelRoom>, IEnumerable<HotelRoomDto>>(_db.HotelRooms);
+                IEnumerable<HotelRoomDto> hotelRoomDtos = _mapper.Map<IEnumerable<HotelRoom>, IEnumerable<HotelRoomDto>>(_db.HotelRooms.Include(x => x.HotelRoomImages));
                 return hotelRoomDtos;
             }
             catch(Exception ex)
@@ -59,7 +58,8 @@ namespace Business.Repository
         {
             try
             {
-                HotelRoomDto hotelRoomDto = _mapper.Map<HotelRoom, HotelRoomDto>(await _db.HotelRooms.FirstOrDefaultAsync(x => x.Id == roomId));
+                HotelRoomDto hotelRoomDto = _mapper.Map<HotelRoom, HotelRoomDto>(await _db.HotelRooms.Include(x => x.HotelRoomImages).FirstOrDefaultAsync(x => x.Id == roomId));
+
                 return hotelRoomDto;
             }
             catch (Exception ex)

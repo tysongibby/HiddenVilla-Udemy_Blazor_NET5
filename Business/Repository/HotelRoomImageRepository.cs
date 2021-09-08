@@ -29,6 +29,16 @@ namespace Business.Repository
             return await _db.SaveChangesAsync();
         }
 
+        public async Task<int> CreateHotelRoomImages(IEnumerable<HotelRoomImageDto> hotelRoomImageDtos)
+        {
+            foreach (HotelRoomImageDto roomImageDto in hotelRoomImageDtos)
+            {
+                var image = _mapper.Map<HotelRoomImageDto, HotelRoomImage>(roomImageDto);
+                await _db.HotelRoomImages.AddAsync(image);                
+            }
+            return await _db.SaveChangesAsync();
+        }
+
         public async Task<int> DeleteHotelRoomImageByImageId(int imageId)
         {
             var image = await _db.HotelRoomImages.FindAsync(imageId);
