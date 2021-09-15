@@ -41,13 +41,52 @@
                         <label>Square feet</label>
                         <InputText @bind-Value="hotelRoomDto.SqFt" class="form-control"></InputText>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="height:250px;">
                         <label>Details</label>
-                        <InputTextArea @bind-Value="hotelRoomDto.Details" class="form-control"></InputTextArea>
+                        @*<InputTextArea @bind-Value="hotelRoomDto.Details" class="form-control"></InputTextArea>*@
+                        <BlazoredTextEditor @ref="@QuillHtml" Placeholder="Room description">
+                            <ToolbarContent>
+                                <select class="ql-header">
+                                    <option selected=""></option>
+                                    <option value="1"></option>
+                                    <option value="2"></option>
+                                    <option value="3"></option>
+                                    <option value="4"></option>
+                                    <option value="5"></option>
+                                </select>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                    <button class="ql-strike"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-list" value="ordered"></button>
+                                    <button class="ql-list" value="bullet"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-link"></button>
+                                </span>
+                            </ToolbarContent>
+                            <EditorContent>
+     
+
+                            </EditorContent>
+                        </BlazoredTextEditor>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="padding-top:70px">
                         <InputFile OnChange="HandleImageUpload" multiple></InputFile>
                         <div class="row">
+                            @if(IsImageUploadProcessStarted)
+                            { 
+                                <div class="col-md-12">
+                                    <span><i class="fa fa-spin fa-spinner"></i>Please wait, images are uploading...</span>
+                                </div>
+                            }
                             @if (hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Count > 0)
                             {
                                 int count = 1;
@@ -57,7 +96,7 @@
                                         <div class="room-image" style="background: url('@imageUrl') 50% 50%;">
                                             <span class="room-image-title">@count</span>
                                         </div>
-                                        <button type="button" class="btn btn-outline-danger btn-block mt-4">
+                                        <button type="button" @onclick="()=>DeletePhoto(imageUrl)" class="btn btn-outline-danger btn-block mt-4">
                                             Delete
                                         </button>
                                     </div>
@@ -84,7 +123,9 @@
     private HotelRoomDto hotelRoomDto { get; set; } = new HotelRoomDto();
     private string Title { get; set; } = "Create";
     private HotelRoomImageDto RoomImageDto { get; set; } = new HotelRoomImageDto();
+    private List<string> deletedImageUrls { get; set; } = new List<string>();
     private bool IsImageUploadProcessStarted { get; set; } = false;
+    public BlazoredTextEditor QuillHtml { get; set; } = new BlazoredTextEditor();
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,7 +144,33 @@
             //create
             hotelRoomDto = new HotelRoomDto();
         }
+
     }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        bool loading = true;
+        while(loading)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(hotelRoomDto.Details))
+                {
+                    await this.QuillHtml.LoadHTMLContent(hotelRoomDto.Details);
+                }
+                loading = false;
+            }
+            catch
+            {
+                await Task.Delay(10);
+                loading = true;
+            }
+
+        }
+
+    }
+
 
     private async Task HandleHotelRoomObsurd()
     {
@@ -118,16 +185,32 @@
         {
             if (hotelRoomDto.Id != 0 && Title == "Update")
             {
+                hotelRoomDto.Details = await QuillHtml.GetHTML();
                 //Update
                 var updateRoomResult = await HotelRoomRepository.UpdateHotelRoom(hotelRoomDto.Id, hotelRoomDto);
-                await AddHotelRoomImage(updateRoomResult);
+                if ((hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Any()) || (deletedImageUrls != null && deletedImageUrls.Any()))
+                {
+                    if(deletedImageUrls != null && deletedImageUrls.Any())
+                    {
+                        foreach(var deletedImageUrl in deletedImageUrls)
+                        {
+                            var imageName = deletedImageUrl.Replace($"RoomImages/", "");
+                            var result = FileUpload.DeleteFile(imageName);
+                            await HotelRoomImageRepository.DeleteHotelRoomImageByUrl(deletedImageUrl);
+
+                        }
+                    }
+
+                    await AddHotelRoomImages(updateRoomResult);
+                }
                 await JsRuntime.ToastrSuccess("Hotel room updated successfully.");
             }
             else
             {
                 //create
+                hotelRoomDto.Details = await QuillHtml.GetHTML();
                 var createdResult = await HotelRoomRepository.CreateHotelRoom(hotelRoomDto);
-                await AddHotelRoomImage(createdResult);
+                await AddHotelRoomImages(createdResult);
                 await JsRuntime.ToastrSuccess("Hotel room created successfully.");
             }
 
@@ -191,12 +274,13 @@
         }
     }
 
-    private async Task AddHotelRoomImage(HotelRoomDto roomDto)
+    private async Task AddHotelRoomImages(HotelRoomDto roomDto)
     {
         try
         {
             foreach (var imageUrl in hotelRoomDto.ImageUrls)
             {
+
                 if (hotelRoomDto.HotelRoomImages == null || hotelRoomDto.HotelRoomImages.Where(x => x.RoomImageUrl == imageUrl).Count() == 0)
                 {
 
@@ -207,11 +291,36 @@
                     };
                     await HotelRoomImageRepository.CreateHotelRoomImage(RoomImageDto);
                 }
+
             }
         }
         catch (Exception ex)
         {
             throw ex;
+        }
+    }
+
+    internal async Task DeletePhoto(string imageUrl)
+    {
+        try
+        {
+            var imageIndex = hotelRoomDto.ImageUrls.FindIndex(x => x == imageUrl);
+            var imageName = imageUrl.Replace($"RoomImages/", "");
+            if (hotelRoomDto.Id == 0 && Title == "Create")
+            {
+                var result = FileUpload.DeleteFile(imageName);
+            }
+            else
+            {
+                //update
+                deletedImageUrls ??= new List<string>();
+                deletedImageUrls.Add(imageUrl);
+            }
+            hotelRoomDto.ImageUrls.RemoveAt(imageIndex);
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.ToastrError(ex.Message);
         }
     }
 
