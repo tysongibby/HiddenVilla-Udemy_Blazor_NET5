@@ -7,14 +7,14 @@ using Models;
 
 namespace Business.Repository.IRepository
 {
-    public interface IHotelRoomRepository
+    public interface IHotelAmenityRepository
     {
-        public Task<HotelRoomDto> CreateHotelRoom(HotelRoomDto hotelRoomDto);
-        public Task<HotelRoomDto> UpdateHotelRoom(int roomId, HotelRoomDto hotelRoomDto);
-        public Task<HotelRoomDto> GetHotelRoom(int roomId);
-        public Task<int> DeleteHotelRoom(int roomId);
-        public Task<IEnumerable<HotelRoomDto>> GetAllHotelRooms();
-        public Task<HotelRoomDto> IsRoomUnique(string name, int roomId = 0);
+        public Task<HotelAmenityDto> CreateHotelAmenity(HotelAmenityDto hotelRoomAmenityDto);
+        public Task<HotelAmenityDto> UpdateHotelAmenity(int roomAmenityId, HotelAmenityDto hotelRoomAmenityDto);
+        public Task<HotelAmenityDto> GetHotelAmenity(int roomAmenityId);
+        public Task<int> DeleteHotelAmenity(int roomAmenityId);
+        public Task<IEnumerable<HotelAmenityDto>> GetAllHotelAmenities();
+        public Task<HotelAmenityDto> IsHotelAmenityUnique(string name, int roomAmenityId = 0);
 
     }
 }

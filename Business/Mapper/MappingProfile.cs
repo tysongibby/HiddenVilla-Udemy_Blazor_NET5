@@ -14,9 +14,8 @@ namespace Business.Mapper
         public MappingProfile()
         {
             CreateMap<HotelRoomDto, HotelRoom>();
-            CreateMap<HotelRoom, HotelRoomDto>();
-
-            // does .ReverseMap adds the map, too, so the map and the reverse map can be written in one line
+            CreateMap<HotelRoom, HotelRoomDto>();            
+            CreateMap<HotelAmenity, HotelAmenityDto>().ReverseMap(); // .ReverseMap adds the map and the reverse map too, so the map and the reverse map can be written in one line
             CreateMap<HotelRoomImage, HotelRoomImageDto>().ReverseMap();
         }
     }

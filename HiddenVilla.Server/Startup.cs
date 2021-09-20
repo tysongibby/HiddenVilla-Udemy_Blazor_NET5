@@ -36,12 +36,14 @@ namespace HiddenVilla.Server
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHttpContextAccessor();
             services.AddSingleton<WeatherForecastService>();
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IHotelRoomRepository, HotelRoomRepository>();
+            services.AddScoped<IHotelAmenityRepository, HotelAmenityRepository>();
             services.AddScoped<IFileUpload, FileUpload>();
             services.AddScoped<IHotelRoomImageRepository, HotelRoomImageRepository>();
         }

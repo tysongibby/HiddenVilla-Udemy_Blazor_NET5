@@ -194,7 +194,7 @@
                     {
                         foreach(var deletedImageUrl in deletedImageUrls)
                         {
-                            var imageName = deletedImageUrl.Replace($"RoomImages/", "");
+                            var imageName = deletedImageUrl.Replace($"{NavigationManager.BaseUri}RoomImages/", "");
                             var result = FileUpload.DeleteFile(imageName);
                             await HotelRoomImageRepository.DeleteHotelRoomImageByUrl(deletedImageUrl);
 
@@ -215,8 +215,9 @@
             }
 
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
+            throw new Exception($"Room update or create failed: {e.Message}");
             // log exceptions
         }
 
@@ -305,7 +306,7 @@
         try
         {
             var imageIndex = hotelRoomDto.ImageUrls.FindIndex(x => x == imageUrl);
-            var imageName = imageUrl.Replace($"RoomImages/", "");
+            var imageName = imageUrl.Replace($"{NavigationManager.BaseUri}RoomImages/", "");
             if (hotelRoomDto.Id == 0 && Title == "Create")
             {
                 var result = FileUpload.DeleteFile(imageName);
