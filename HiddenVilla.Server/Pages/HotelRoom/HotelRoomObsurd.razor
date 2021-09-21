@@ -12,7 +12,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @inject IFileUpload FileUpload
-@*@attribute [Authorize]*@
+@attribute [Authorize(Roles = Common.SD.Role_Admin)]
 
 <div class="row mt-2 mb-5">
     <h3 class="card-title text-info mb-3">Create Hotel Room</h3>
@@ -133,7 +133,7 @@
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await AuthenticationState;
-        if (!authenticationState.User.Identity.IsAuthenticated)
+        if (!authenticationState.User.IsInRole(Common.SD.Role_Admin))
         {
             var uri = new Uri(NavigationManager.Uri);
             NavigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
