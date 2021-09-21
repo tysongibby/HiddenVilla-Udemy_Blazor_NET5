@@ -12,7 +12,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @inject IFileUpload FileUpload
-
+@*@attribute [Authorize]*@
 
 <div class="row mt-2 mb-5">
     <h3 class="card-title text-info mb-3">Create Hotel Room</h3>
@@ -73,7 +73,7 @@
                                 </span>
                             </ToolbarContent>
                             <EditorContent>
-     
+
 
                             </EditorContent>
                         </BlazoredTextEditor>
@@ -81,8 +81,8 @@
                     <div class="form-group" style="padding-top:70px">
                         <InputFile OnChange="HandleImageUpload" multiple></InputFile>
                         <div class="row">
-                            @if(IsImageUploadProcessStarted)
-                            { 
+                            @if (IsImageUploadProcessStarted)
+                            {
                                 <div class="col-md-12">
                                     <span><i class="fa fa-spin fa-spinner"></i>Please wait, images are uploading...</span>
                                 </div>
@@ -120,6 +120,8 @@
 
     [Parameter]
     public int? Id { get; set; }
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
     private HotelRoomDto hotelRoomDto { get; set; } = new HotelRoomDto();
     private string Title { get; set; } = "Create";
     private HotelRoomImageDto RoomImageDto { get; set; } = new HotelRoomImageDto();
@@ -127,14 +129,22 @@
     private bool IsImageUploadProcessStarted { get; set; } = false;
     public BlazoredTextEditor QuillHtml { get; set; } = new BlazoredTextEditor();
 
+
     protected override async Task OnInitializedAsync()
     {
+        var authenticationState = await AuthenticationState;
+        if (!authenticationState.User.Identity.IsAuthenticated)
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            NavigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}");
+        }
+
         if (Id != null)
         {
             //update
             Title = "Update";
             hotelRoomDto = await HotelRoomRepository.GetHotelRoom(Id.Value);
-            if(hotelRoomDto?.HotelRoomImages.Count != null)
+            if (hotelRoomDto?.HotelRoomImages.Count != null)
             {
                 hotelRoomDto.ImageUrls = hotelRoomDto.HotelRoomImages.Select(u => u.RoomImageUrl).ToList();
             }
@@ -151,7 +161,7 @@
     {
         if (!firstRender) return;
         bool loading = true;
-        while(loading)
+        while (loading)
         {
             try
             {
@@ -190,9 +200,9 @@
                 var updateRoomResult = await HotelRoomRepository.UpdateHotelRoom(hotelRoomDto.Id, hotelRoomDto);
                 if ((hotelRoomDto.ImageUrls != null && hotelRoomDto.ImageUrls.Any()) || (deletedImageUrls != null && deletedImageUrls.Any()))
                 {
-                    if(deletedImageUrls != null && deletedImageUrls.Any())
+                    if (deletedImageUrls != null && deletedImageUrls.Any())
                     {
-                        foreach(var deletedImageUrl in deletedImageUrls)
+                        foreach (var deletedImageUrl in deletedImageUrls)
                         {
                             var imageName = deletedImageUrl.Replace($"{NavigationManager.BaseUri}RoomImages/", "");
                             var result = FileUpload.DeleteFile(imageName);

@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @inject HiddenVilla.Server.Services.IServices.IFileUpload FileUpload
+@attribute [Authorize]
 
 <div class="row mt-4">
     <div class="col-8">
@@ -82,7 +83,7 @@
         if (isConfirmed && DeleteRoomId != null)
         {
             HotelRoomDto hotelRoomDto = await HotelRoomRepository.GetHotelRoom(DeleteRoomId.Value);
-            foreach(var image in hotelRoomDto.HotelRoomImages)
+            foreach (var image in hotelRoomDto.HotelRoomImages)
             {
                 var imageName = image.RoomImageUrl.Replace($"{NavigationManager.BaseUri}RoomImages/", "");
                 FileUpload.DeleteFile(imageName);

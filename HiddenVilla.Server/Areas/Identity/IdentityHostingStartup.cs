@@ -14,14 +14,18 @@ namespace HiddenVilla.Server.Areas.Identity
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) => {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(
-                        context.Configuration.GetConnectionString("ApplicationDbContextConnection")));
+            //code from udemy course
+            builder.ConfigureServices((context, services) => { });
 
-                //Default Identity Scheme
-                //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
-            });
+            //Scaffolded code
+            //builder.ConfigureServices((context, services) => {
+            //    services.AddDbContext<ApplicationDbContext>(options =>
+            //        options.UseSqlServer(
+            //            context.Configuration.GetConnectionString("ApplicationDbContextConnection")));
+
+            //    //Default Identity Scheme
+            //    //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+            //});
         }
     }
 }
