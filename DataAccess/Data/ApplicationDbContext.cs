@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         { 
@@ -17,5 +19,18 @@ namespace DataAccess.Data
         public DbSet<HotelRoom> HotelRooms { get; set; }
         public DbSet<HotelRoomImage> HotelRoomImages { get; set; }
         public DbSet<HotelAmenity> HotelAmenities { get; set; }
+
+        //public DbSet<RoomOrderDetails> RoomOrderDetails { get; set; }
+
+        //public DbSet<ApplicationUser> ApplicationUser { get; set; }
+
+
+        //protected override void OnModelCreating(ModelBuilder builder)
+        //{
+        //    base.OnModelCreating(builder);
+        //    // Customize the ASP.NET Identity model and override the defaults if needed.
+        //    // For example, you can rename the ASP.NET Identity table names and more.
+        //    // Add your customizations after calling base.OnModelCreating(builder);
+        //}
     }
 }

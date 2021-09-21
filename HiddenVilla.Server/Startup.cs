@@ -17,7 +17,7 @@ using Business.Repository.IRepository;
 using Business.Repository;
 using HiddenVilla.Server.Services;
 using HiddenVilla.Server.Services.IServices;
-
+using Microsoft.AspNetCore.Identity;
 
 namespace HiddenVilla.Server
 {
@@ -34,18 +34,24 @@ namespace HiddenVilla.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddHttpContextAccessor();
-            services.AddSingleton<WeatherForecastService>();
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<ApplicationDbContext>(options 
+                => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders()
+                .AddDefaultUI();
+                        
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
             services.AddScoped<IHotelRoomRepository, HotelRoomRepository>();
             services.AddScoped<IHotelAmenityRepository, HotelAmenityRepository>();
             services.AddScoped<IFileUpload, FileUpload>();
             services.AddScoped<IHotelRoomImageRepository, HotelRoomImageRepository>();
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddHttpContextAccessor();
+            services.AddSingleton<WeatherForecastService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,9 +72,13 @@ namespace HiddenVilla.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
